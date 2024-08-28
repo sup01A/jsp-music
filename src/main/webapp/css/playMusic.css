@@ -1,0 +1,30 @@
+
+
+
+.container2 {
+    background-color: white;
+    text-align: center;
+    color: #bcbaba;
+    height: 780px;
+    overflow: hidden;
+}
+
+.container2 ul {
+    transition: 0.6s;
+    list-style: none;
+}
+
+.container2 li {
+    height: 30px;
+    line-height: 30px;
+    transition: 1.5s;
+}
+
+.container2 li.active {
+    color: black;
+    /* font-size: 40px; */
+    /*transform: scale(1.2);*/
+}
+
+
+

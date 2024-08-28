@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mapper.RecommendMapper">
+    <!--    二级缓存相关-->
+    <!--    <cache eviction="LRU" flushInterval="60000" size="512" readOnly="true"/>-->
+
+    <select id="findAll" resultMap="Recommend">
+        select recmdId, Song.songId, Song.singerId, songTitle, songPlaytimes, songDldtimes,
+               Album.albumId, Album.albumTitle, Album.albumPic, Album.albumPubDate, Album.albumPubCom,
+               Singer.singerName, Singer.singerSex, Singer.singerThumbnail, Singer.singerIntroduction
+        from Recommend, Song, Album, Singer
+        where Song.songId = Recommend.songId AND Song.albumId = Album.albumId AND Song.singerId = Singer.singerId;
+    </select>
+    <resultMap id="Recommend" type="com.example.jspmusic.vo.Recommend">
+        <result property="recmdId" column="recmdId"/>
+        <result property="songId" column="songId"/>
+        <association property="song" javaType="com.example.jspmusic.vo.Song">
+            <result property="songId" column="songId"/>
+            <result property="singerId" column="singerId"/>
+            <result property="albumId" column="albumId"/>
+            <result property="songTitle" column="songTitle"/>
+            <result property="songPlaytimes" column="songPlaytimes"/>
+            <result property="songDldtimes" column="songDldtimes"/>
+        </association>
+        <association property="album" javaType="com.example.jspmusic.vo.Album">
+            <result property="albumId" column="albumId"/>
+            <result property="singerId" column="singerId"/>
+            <result property="albumTitle" column="albumTitle"/>
+            <result property="albumPic" column="albumPic"/>
+            <result property="albumPubDate" column="albumPubDate"/>
+            <result property="albumPubCom" column="albumPubCom"/>
+        </association>
+        <association property="singer" javaType="com.example.jspmusic.vo.Singer">
+            <result property="singerId" column="singerId"/>
+            <result property="singerName" column="singerName"/>
+            <result property="singerSex" column="singerSex"/>
+            <result property="singerThumbnail" column="singerThumbnail"/>
+            <result property="singerIntroduction" column="singerIntroduction"/>
+        </association>
+    </resultMap>
+<!--    增加一条推荐-->
+    <insert id="add" parameterType="java.lang.Integer">
+        INSERT INTO Recommend(songId) VALUES(#{songId})
+    </insert>
+<!--    删除一条推荐-->
+    <delete id="remove" parameterType="java.lang.Integer">
+        DELETE FROM Recommend WHERE recmdId=#{recmdId}
+    </delete>
+</mapper>

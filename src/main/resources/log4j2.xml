@@ -1,0 +1,24 @@
+<Configuration status="WARN">
+    <Appenders>
+        <Console name="myConsole" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
+        </Console>
+
+
+    </Appenders>
+    <Loggers>
+        <Root level="ALL">
+        </Root>
+        <!--这里的name为你自己mapper的地址-->
+        <Logger name="mapper.Tb_MusicMapper" level="DEBUG">
+            <AppenderRef ref="myConsole"/>
+        </Logger>
+        <Logger name="mapper.Tb_UserMapper" level="DEBUG">
+            <AppenderRef ref="myConsole"/>
+        </Logger>
+        <Logger name="mapper.Tb_FavoriteListMapper" level="DEBUG">
+            <AppenderRef ref="myConsole"/>
+        </Logger>
+    </Loggers>
+</Configuration>
+

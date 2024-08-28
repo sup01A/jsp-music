@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mapper.AdminMapper">
+    <!--    二级缓存相关-->
+    <!--    <cache eviction="LRU" flushInterval="60000" size="512" readOnly="true"/>-->
+    <!--    返回歌曲下载排行前十-->
+<!--    管理员登陆-->
+    <select id="login" parameterType="com.example.jspmusic.vo.Admin" resultType="com.example.jspmusic.vo.Admin">
+        SELECT adminId, adminUsername, adminRegisterDate, adminLastDate FROM Admin WHERE 1=1
+        and adminUsername = #{adminUsername}
+        and adminPassword = #{adminPassword}
+    </select>
+<!--    添加管理员-->
+    <insert id="save" parameterType="com.example.jspmusic.vo.Admin">
+        INSERT INTO Admin(adminUsername, adminPassword, adminRegisterDate, adminLastDate) VALUES(#{adminUsername},#{adminPassword},#{adminRegisterDate},#{adminLastDate})
+    </insert>
+<!--    管理员修改密码-->
+    <update id="update" parameterType="com.example.jspmusic.vo.Admin">
+        UPDATE Admin SET adminPassword=#{adminPassword} WHERE adminId=#{adminId}
+    </update>
+</mapper>

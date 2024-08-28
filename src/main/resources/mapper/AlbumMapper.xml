@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mapper.AlbumMapper">
+    <!--    二级缓存相关-->
+    <!--    <cache eviction="LRU" flushInterval="60000" size="512" readOnly="true"/>-->
+    <select id="findAllAlbums" resultType="com.example.jspmusic.vo.Album">
+        SELECT * FROM Album WHERE 1=1
+    </select>
+    <select id="findAlbumInfo" parameterType="com.example.jspmusic.vo.Album" resultMap="AlbumAllInfo">
+        SELECT Album.albumId, Album.albumTitle, Album.albumPic, Album.albumPubDate, Album.albumPubCom,
+               Singer.singerId, Singer.singerName, Singer.singerSex, Singer.singerThumbnail, Singer.singerIntroduction
+        from Album, Singer
+        where Album.albumId=#{albumId} AND Album.singerId=Singer.singerId
+    </select>
+    <resultMap id="AlbumAllInfo" type="com.example.jspmusic.vo.AlbumAllInfo">
+        <association property="album" javaType="com.example.jspmusic.vo.Album">
+            <result property="albumId" column="albumId"/>
+            <result property="singerId" column="singerId"/>
+            <result property="albumTitle" column="albumTitle"/>
+            <result property="albumPic" column="albumPic"/>
+            <result property="albumPubDate" column="albumPubDate"/>
+            <result property="albumPubCom" column="albumPubCom"/>
+        </association>
+        <association property="singer" javaType="com.example.jspmusic.vo.Singer">
+            <result property="singerId" column="singerId"/>
+            <result property="singerName" column="singerName"/>
+            <result property="singerSex" column="singerSex"/>
+            <result property="singerThumbnail" column="singerThumbnail"/>
+            <result property="singerIntroduction" column="singerIntroduction"/>
+        </association>
+    </resultMap>
+    <!--    获得专辑总数-->
+    <select id="totalNum" resultType="java.lang.Integer">
+        select count(albumId) as totalRecord from Album where 1=1
+    </select>
+    <!--    limit获得专辑信息-->
+    <select id="limitSinger" parameterType="com.example.jspmusic.vo.Page" resultType="com.example.jspmusic.vo.Album">
+        SELECT * FROM Album WHERE 1=1
+            LIMIT #{fromIndex},#{pageSize}
+    </select>
+<!--    增加一条专辑记录-->
+    <insert id="save" parameterType="com.example.jspmusic.vo.Album">
+        INSERT INTO Album(singerId, albumTitle, albumPic, albumPubDate, albumPubCom)
+        VALUES(#{singerId},#{albumTitle},#{albumPic},#{albumPubDate},#{albumPubCom})
+    </insert>
+<!--    删除一条专辑记录-->
+    <delete id="del" parameterType="com.example.jspmusic.vo.Album">
+        DELETE FROM Album WHERE albumId=#{albumId}
+    </delete>
+<!--    更新一个专辑记录-->
+    <update id="update" parameterType="com.example.jspmusic.vo.Album">
+        UPDATE Album SET singerId=#{singerId}, albumTitle=#{albumTitle}, albumPic=#{albumPic}, albumPubDate=#{albumPubDate}, albumPubCom=#{albumPubCom} WHERE albumId=#{albumId}
+    </update>
+</mapper>

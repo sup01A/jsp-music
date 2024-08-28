@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mapper.NormalUserMapper">
+    <!--    二级缓存相关-->
+    <!--    <cache eviction="LRU" flushInterval="60000" size="512" readOnly="true"/>-->
+<!--    登陆验证用-->
+    <select id="getAllUser" resultType="com.example.jspmusic.vo.NormalUser">
+        SELECT userId, userName, userNickname, userSex, userEmail, userAvatar, userRegisterDate FROM NormalUser WHERE 1=1 and userName = #{userName} and userPassword = #{userPassword}
+    </select>
+<!--    更改个人信息-->
+    <update id="setting" parameterType="com.example.jspmusic.vo.NormalUser">
+        UPDATE NormalUser SET userNickname=#{userNickname}, userSex=#{userSex} WHERE userId=#{userId}
+    </update>
+    <select id="afterSetting" parameterType="java.lang.Integer" resultType="com.example.jspmusic.vo.NormalUser">
+        SELECT userId, userName, userNickname, userSex, userEmail, userAvatar, userRegisterDate FROM NormalUser WHERE 1=1 and userId = #{userId}
+    </select>
+<!--    上传个人头像-->
+    <update id="save_avatar" parameterType="com.example.jspmusic.vo.NormalUser">
+        UPDATE NormalUser SET userAvatar=#{userAvatar} WHERE userId=#{userId}
+    </update>
+<!--    修改个人密码-->
+    <update id="save_psw" parameterType="com.example.jspmusic.vo.NormalUser">
+        UPDATE NormalUser SET userPassword=#{userPassword} WHERE userId=#{userId}
+    </update>
+<!--    查找个人收藏歌曲-->
+    <select id="findUserSong" parameterType="com.example.jspmusic.vo.NormalUserSong" resultMap="UserSong">
+        SELECT Song.*,
+               Singer.singerName
+        from Song
+        join NormalUserSong on Song.songId = NormalUserSong.songId
+        join Singer on Singer.singerId = Song.singerId
+        where NormalUserSong.userId = #{userId}
+    </select>
+    <resultMap id="UserSong" type="com.example.jspmusic.vo.Song">
+        <result property="songId" column="songId"/>
+        <result property="singerId" column="singerId"/>
+        <result property="albumId" column="albumId"/>
+        <result property="songTitle" column="songTitle"/>
+        <result property="songPlaytimes" column="songPlaytimes"/>
+        <result property="songDldtimes" column="songDldtimes"/>
+        <result property="songFile" column="songFile"/>
+        <result property="songLyric" column="songLyric"/>
+        <association property="singer" javaType="com.example.jspmusic.vo.Singer">
+            <result property="singerName" column="singerName"/>
+        </association>
+    </resultMap>
+<!--    判断个人是否收藏歌曲-->
+    <select id="isfollow" parameterType="com.example.jspmusic.vo.NormalUserSong" resultType="com.example.jspmusic.vo.NormalUserSong">
+        SELECT * FROM NormalUserSong WHERE userId=#{userId} AND songId=#{songId}
+    </select>
+<!--    增加收藏音乐-->
+    <insert id="saveSong" parameterType="com.example.jspmusic.vo.NormalUserSong">
+        INSERT INTO NormalUserSong VALUES(#{userId},#{songId})
+    </insert>
+<!--    取消收藏-->
+    <delete id="deleteSong" parameterType="com.example.jspmusic.vo.NormalUserSong">
+        DELETE FROM NormalUserSong WHERE userId=#{userId} AND songId=#{songId}
+    </delete>
+    <!--    查找个人收藏专辑-->
+    <select id="findAllAlbum" parameterType="com.example.jspmusic.vo.NormalUserAlbum" resultMap="UserAlbum">
+        SELECT Album.albumId, Album.albumTitle, Album.albumPic, Album.albumPubDate, Album.albumPubCom,
+               Singer.*
+        FROM NormalUserAlbum
+        JOIN Album on NormalUserAlbum.albumId = Album.albumId
+        JOIN Singer on Singer.singerId = Album.singerId
+        WHERE NormalUserAlbum.userId = #{userId}
+    </select>
+    <resultMap id="UserAlbum" type="com.example.jspmusic.vo.Album">
+        <result property="albumId" column="albumId"/>
+        <result property="singerId" column="singerId"/>
+        <result property="albumTitle" column="albumTitle"/>
+        <result property="albumPic" column="albumPic"/>
+        <result property="albumPubDate" column="albumPubDate"/>
+        <result property="albumPubCom" column="albumPubCom"/>
+        <association property="singer" javaType="com.example.jspmusic.vo.Singer">
+            <result property="singerId" column="singerId"/>
+            <result property="singerName" column="singerName"/>
+            <result property="singerSex" column="singerSex"/>
+            <result property="singerThumbnail" column="singerThumbnail"/>
+            <result property="singerIntroduction" column="singerIntroduction"/>
+        </association>
+    </resultMap>
+    <!--    判断个人是否收藏专辑-->
+    <select id="isfollowAlbum" parameterType="com.example.jspmusic.vo.NormalUserAlbum" resultType="com.example.jspmusic.vo.NormalUserAlbum">
+        SELECT * FROM NormalUserAlbum WHERE userId=#{userId} AND albumId=#{albumId}
+    </select>
+    <!--    增加收藏专辑-->
+    <insert id="saveAlbum" parameterType="com.example.jspmusic.vo.NormalUserAlbum">
+        INSERT INTO NormalUserAlbum VALUES(#{userId},#{albumId})
+    </insert>
+    <!--    取消收藏专辑-->
+    <delete id="deleteAlbum" parameterType="com.example.jspmusic.vo.NormalUserAlbum">
+        DELETE FROM NormalUserAlbum WHERE userId=#{userId} AND albumId=#{albumId}
+    </delete>
+    <!--    查找个人收藏歌手-->
+    <select id="findAllSinger" parameterType="java.lang.Integer" resultType="com.example.jspmusic.vo.Singer">
+        SELECT Singer.*
+        FROM Singer
+        join NormalUserSinger
+        on Singer.singerId = NormalUserSinger.singerId
+        where NormalUserSinger.userId = #{userId}
+    </select>
+    <!--    判断个人是否收藏歌手-->
+    <select id="isfollowSinger" parameterType="com.example.jspmusic.vo.NormalUserSinger" resultType="com.example.jspmusic.vo.NormalUserSinger">
+        SELECT * FROM NormalUserSinger WHERE userId=#{userId} AND singerId=#{singerId}
+    </select>
+    <!--    增加收藏歌手-->
+    <insert id="saveSinger" parameterType="com.example.jspmusic.vo.NormalUserSinger">
+        INSERT INTO NormalUserSinger VALUES(#{userId},#{singerId})
+    </insert>
+    <!--    取消收藏歌手-->
+    <delete id="deleteSinger" parameterType="com.example.jspmusic.vo.NormalUserSinger">
+        DELETE FROM NormalUserSinger WHERE userId=#{userId} AND singerId=#{singerId}
+    </delete>
+<!--    添加评论-->
+    <insert id="saveComment" parameterType="com.example.jspmusic.vo.Comments">
+        INSERT INTO Comments(userId, songId, commentText, commentDate) VALUES(#{userId},#{songId},#{commentText},#{commentDate})
+    </insert>
+<!--    封禁，即更新用户状态-->
+    <update id="ban" parameterType="com.example.jspmusic.vo.NormalUser">
+        UPDATE NormalUser SET userStatus=#{userStatus} WHERE userId=#{userId}
+    </update>
+<!--    查询用户名是否已存在-->
+    <select id="existUsername" parameterType="java.lang.String" resultType="com.example.jspmusic.vo.NormalUser">
+        select userId from NormalUser where userName = #{userName}
+    </select>
+<!--    插入一个新用户-->
+    <insert id="addNormalUser" parameterType="com.example.jspmusic.vo.NormalUser">
+        INSERT INTO NormalUser(userName, userPassword, userNickname, userSex, userEmail, userAvatar, userRegisterDate, userLastDate, userStatus) VALUES(#{userName},#{userPassword},#{userNickname},#{userSex},#{userEmail},#{userAvatar},#{userRegisterDate},#{userLastDate},#{userStatus})
+    </insert>
+</mapper>

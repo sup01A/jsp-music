@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mapper.SongMapper">
+    <!--    二级缓存相关-->
+    <!--    <cache eviction="LRU" flushInterval="60000" size="512" readOnly="true"/>-->
+<!--    返回歌曲下载排行前十-->
+    <select id="downloadRank" resultType="com.example.jspmusic.vo.Song">
+        SELECT songId, songTitle, songDldtimes FROM Song ORDER BY songDldtimes DESC LIMIT 0,10
+    </select>
+    <select id="AlbumAllInfo" parameterType="com.example.jspmusic.vo.Album" resultType="com.example.jspmusic.vo.Song">
+        SELECT Song.songId, Song.songTitle, Song.songPlaytimes, Song.songDldtimes, Song.songFile
+        FROM Album, Song
+        WHERE Song.albumId=Album.albumId AND Album.albumId=#{albumId}
+    </select>
+    <select id="findSongInfo_Song" parameterType="com.example.jspmusic.vo.Song" resultType="com.example.jspmusic.vo.Song">
+        select * from Song where songId = #{songId}
+    </select>
+    <select id="findSongInfo_Album" parameterType="java.lang.Integer" resultType="com.example.jspmusic.vo.Album">
+        select * from Album where albumId = #{albumId}
+    </select>
+    <select id="findSongInfo_Singer" parameterType="java.lang.Integer" resultType="com.example.jspmusic.vo.Singer">
+        select * from Singer where singerId = #{singerId}
+    </select>
+    <select id="findSongComments" parameterType="java.lang.Integer" resultMap="SongCommentsMap">
+        SELECT Comments.commentId, Comments.commentText, Comments.commentDate,
+               NormalUser.userId, NormalUser.userAvatar, NormalUser.userNickname,
+               songId
+        FROM Comments join NormalUser
+        ON Comments.userId = NormalUser.userId
+        where Comments.songId = #{songId}
+    </select>
+    <resultMap id="SongCommentsMap" type="com.example.jspmusic.vo.Comments">
+        <result property="commentId" column="commentId"/>
+        <result property="userId" column="commentId"/>
+        <result property="songId" column="songId"/>
+        <result property="commentText" column="commentText"/>
+        <result property="commentDate" column="commentDate"/>
+        <association property="normalUser" javaType="com.example.jspmusic.vo.NormalUser">
+            <result property="userId" column="userId"/>
+            <result property="userAvatar" column="userAvatar"/>
+            <result property="userNickname" column="userNickname"/>
+        </association>
+    </resultMap>
+    <select id="findSongsByTitle" parameterType="java.lang.String" resultMap="songSearch">
+        SELECT Song.*,
+               Singer.*
+        FROM Song
+        join Singer
+        on Song.singerId = Singer.singerId
+        where 1=1
+        <if test="songTitle != null and songTitle.trim() != ''">
+            AND Song.songTitle like CONCAT('%',#{songTitle},'%')
+        </if>
+    </select>
+    <resultMap id="songSearch" type="com.example.jspmusic.vo.Song">
+        <result property="songId" column="songId"/>
+        <result property="singerId" column="singerId"/>
+        <result property="albumId" column="albumId"/>
+        <result property="songTitle" column="songTitle"/>
+        <result property="songPlaytimes" column="songPlaytimes"/>
+        <result property="songDldtimes" column="songDldtimes"/>
+        <result property="songFile" column="songFile"/>
+        <result property="songLyric" column="songLyric"/>
+        <association property="singer" javaType="com.example.jspmusic.vo.Singer">
+            <result property="singerId" column="singerId"/>
+            <result property="singerName" column="singerName"/>
+            <result property="singerSex" column="singerSex"/>
+            <result property="singerThumbnail" column="singerThumbnail"/>
+            <result property="singerIntroduction" column="singerIntroduction"/>
+        </association>
+    </resultMap>
+<!--    更新下载次数-->
+    <update id="downloadSong" parameterType="java.lang.Integer">
+        UPDATE Song SET songDldtimes=songDldtimes+1 WHERE songId=#{songId}
+    </update>
+<!--    获得总歌曲数-->
+    <select id="totalNum" resultType="java.lang.Integer">
+        select count(songId) as totalRecord from Song where 1=1
+    </select>
+    <!--    limit获得歌曲信息-->
+    <select id="limitSong" parameterType="com.example.jspmusic.vo.Page" resultType="com.example.jspmusic.vo.Song">
+        SELECT * FROM Song WHERE 1=1
+            LIMIT #{fromIndex},#{pageSize}
+    </select>
+<!--    插入一条歌曲信息记录-->
+    <insert id="save" parameterType="com.example.jspmusic.vo.Song">
+        INSERT INTO Song(singerId, albumId, songTitle, songPlaytimes, songDldtimes, songFile, songLyric)
+        VALUES(#{singerId},#{albumId},#{songTitle},#{songPlaytimes},#{songDldtimes},#{songFile},#{songLyric})
+    </insert>
+<!--    删除一条歌曲记录-->
+    <delete id="del" parameterType="com.example.jspmusic.vo.Song">
+        DELETE FROM Song WHERE songId=#{songId}
+    </delete>
+<!--    更新一条歌曲信息-->
+    <update id="update" parameterType="com.example.jspmusic.vo.Song">
+        UPDATE Song SET singerId=#{singerId}, albumId=#{albumId}, songTitle=#{songTitle}, songFile=#{songFile}, songLyric=#{songLyric} WHERE songId=#{songId}
+    </update>
+</mapper>

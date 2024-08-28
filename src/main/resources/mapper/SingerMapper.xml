@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mapper.SingerMapper">
+    <!--    二级缓存相关-->
+    <!--    <cache eviction="LRU" flushInterval="60000" size="512" readOnly="true"/>-->
+    <select id="findAllSingers" resultType="com.example.jspmusic.vo.Singer">
+        SELECT * FROM Singer WHERE 1=1
+    </select>
+    <select id="findSingerInfo_Singer" parameterType="com.example.jspmusic.vo.Singer" resultType="com.example.jspmusic.vo.Singer">
+        select * from Singer where singerId = #{singerId}
+    </select>
+    <select id="findSingerInfo_Song" parameterType="com.example.jspmusic.vo.Singer" resultType="com.example.jspmusic.vo.Song">
+        SELECT Singer.singerId,
+               Song.songId, Song.songTitle, Song.songPlaytimes, Song.songDldtimes, Song.songFile, Song.songLyric
+        FROM Singer
+                 JOIN Song ON Singer.singerId = Song.singerId
+        WHERE
+            Singer.singerId = #{singerId}
+    </select>
+    <select id="findSingerInfo_Album" parameterType="com.example.jspmusic.vo.Singer" resultType="com.example.jspmusic.vo.Album">
+        SELECT Album.albumId, Album.albumTitle, Album.albumPic, Album.albumPubDate, Album.albumPubCom
+        FROM Singer JOIN Album ON Singer.singerId = Album.singerId
+        WHERE Singer.singerId= #{singerId}
+    </select>
+<!--    获得歌手总数-->
+    <select id="totalNum" resultType="java.lang.Integer">
+        select count(singerId) as totalRecord from Singer where 1=1
+    </select>
+<!--    limit获得歌手信息-->
+    <select id="limitSinger" parameterType="com.example.jspmusic.vo.Page" resultType="com.example.jspmusic.vo.Singer">
+        SELECT * FROM Singer WHERE 1=1
+        LIMIT #{fromIndex},#{pageSize}
+    </select>
+<!--    增加一条歌手记录-->
+    <insert id="save" parameterType="com.example.jspmusic.vo.Singer">
+        INSERT INTO Singer(singerName, singerSex, singerThumbnail, singerIntroduction)
+        VALUES(#{singerName},#{singerSex},#{singerThumbnail},#{singerIntroduction})
+    </insert>
+<!--    删除一条歌手记录-->
+    <delete id="del" parameterType="com.example.jspmusic.vo.Singer">
+        DELETE FROM Singer WHERE singerId=#{singerId}
+    </delete>
+<!--    更新一条歌手记录-->
+    <update id="update" parameterType="com.example.jspmusic.vo.Singer">
+        UPDATE Singer SET singerName=#{singerName}, singerSex=#{singerSex}, singerThumbnail=#{singerThumbnail}, singerIntroduction=#{singerIntroduction} WHERE singerId=#{singerId}
+    </update>
+</mapper>
